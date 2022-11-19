@@ -73,9 +73,10 @@ def getMovieDownloadList():
         # 类型
         i_type = parseReMatch(re.search('◎类　　别　.+(<br />◎语)', data.text), ['◎类　　别　', '<br />◎语', ' '])
         # 简介
-        i_plot = parseReMatch(re.search('◎简　　介<br /><br />　　.+?(<br /><br /><)', data.text), ['◎简　　介<br /><br />　　', '<br /><br /><', '\n\n'])
-        # 海报地址 <img border="0" src=".+?"
-        i_posturl = parseReMatch(re.search('<img border="0" src=".+?"', data.text), ['<img border="0" src=', '"'])
+        i_plot = parseReMatch(re.search('◎简　　介<br />.+?(<br /><br /><)', data.text), ['◎简　　介<br />', '<br /><br /><', '\n\n', '　', '<br />'])
+        # 海报地址 <img border="0" src=".+?"    //*[@id="Zoom"]/span/img
+        i_posturl = parseReMatch(re.search('<img.+src=".+?.jpg|<img.+src=".+?.png', data.text), [])  # 先找到img标签
+        i_posturl = parseReMatch(re.search('http.*', i_posturl), [])  # 找到url链接
         # 下载地址
         i_downloadurl = ''
         i_downloadurl_r = re.search('magnet(.*?)[^"]+', data.text)
@@ -90,13 +91,13 @@ def getMovieDownloadList():
         divItem = divItem.replace('#国家#', i_country)
         divItem = divItem.replace('#评分#', i_score)
         divItem = divItem.replace('#类型#', i_type)
-        divItem = divItem.replace('#简介#', i_plot[0:250]+'...')
+        divItem = divItem.replace('#简介#', i_plot[0:200]+'...')
         divItem = divItem.replace('#下载地址#', i_downloadurl)
         divItem = divItem.replace('#海报链接#', i_posturl)
         htmlMovieContent += divItem
 
     htmlTextMain = htmlTextMain.replace(htmlMovieTemp, htmlMovieContent)
-    htmlTextMain = htmlTextMain.replace('#更新日期#', time.strftime('%Y年%m月%d日', time.localtime(time.time())))
+    htmlTextMain = htmlTextMain.replace('#更新日期#', time.strftime('%Y年%m月%d日 %H:%M:%S', time.localtime(time.time())))
     file = open(file=savePath, mode='w+', encoding='utf-8')
     file.write(htmlTextMain)
     file.close()
